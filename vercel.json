@@ -4,11 +4,13 @@
   "cleanUrls": true,
   "trailingSlash": false,
   "builds": [
+    { "src": "index.html", "use": "@vercel/static" },
     { "src": "camera.html", "use": "@vercel/static" },
     { "src": "public/**", "use": "@vercel/static" }
   ],
   "routes": [
-    { "src": "/", "dest": "/camera.html" },
+    { "src": "/", "dest": "/index.html" },
+    { "src": "/camera.html", "dest": "/camera.html" },
     { "src": "/(.*)", "dest": "/$1" }
   ]
 } 
