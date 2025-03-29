@@ -1,0 +1,3 @@
+@echo off
+echo カメラサーバーを起動しています...
+py server.py 

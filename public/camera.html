@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>フロントカメラ映像</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    video {
+      border: 1px solid #ccc;
+      margin: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>フロントカメラ映像</h1>
+  <p>「撮影開始」ボタンを押して、カメラへのアクセスを許可してください。</p>
+  <button id="startBtn">撮影開始</button>
+  
+  <div>
+    <h2>内カメラ映像（フロントカメラ）</h2>
+    <video id="frontVideo" autoplay playsinline width="320" height="240"></video>
+  </div>
+
+  <script>
+    document.getElementById('startBtn').addEventListener('click', async () => {
+      try {
+        // フロントカメラを指定
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: "user" }
+        });
+        document.getElementById('frontVideo').srcObject = stream;
+      } catch (err) {
+        console.error('フロントカメラの取得に失敗:', err);
+        alert('フロントカメラの取得に失敗しました。');
+      }
+    });
+  </script>
+</body>
+</html> 
