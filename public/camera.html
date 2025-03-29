@@ -2,15 +2,47 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>フロントカメラ映像</title>
   <style>
     body {
       font-family: Arial, sans-serif;
       margin: 20px;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
     }
     video {
       border: 1px solid #ccc;
       margin: 10px;
+      max-width: 100%;
+    }
+    .error {
+      color: red;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+    .info {
+      background-color: #f0f0f0;
+      padding: 10px;
+      border-radius: 5px;
+      margin-top: 20px;
+    }
+    .status {
+      margin-top: 10px;
+      font-style: italic;
+    }
+    button {
+      padding: 10px 15px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    button:hover {
+      background-color: #45a049;
     }
   </style>
 </head>
@@ -22,19 +54,65 @@
   <div>
     <h2>内カメラ映像（フロントカメラ）</h2>
     <video id="frontVideo" autoplay playsinline width="320" height="240"></video>
+    <div id="errorMessage" class="error"></div>
+    <div id="statusMessage" class="status"></div>
+  </div>
+
+  <div class="info">
+    <h3>注意事項</h3>
+    <ul>
+      <li>カメラへのアクセスはHTTPS接続が必要な場合があります</li>
+      <li>ローカル環境では、localhost で実行する必要があります</li>
+      <li>ブラウザのカメラ権限が許可されていることを確認してください</li>
+      <li>最新のブラウザを使用してください</li>
+    </ul>
   </div>
 
   <script>
+    // ページロード時のステータス表示
+    document.addEventListener('DOMContentLoaded', function() {
+      const statusMessage = document.getElementById('statusMessage');
+      if (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+        statusMessage.textContent = '接続状態: OK - ' + location.protocol + '//' + location.hostname;
+      } else {
+        statusMessage.textContent = '警告: 安全でない接続 - カメラへのアクセスが制限される可能性があります';
+      }
+    });
+
     document.getElementById('startBtn').addEventListener('click', async () => {
       try {
         // フロントカメラを指定
         const stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: "user" }
+          video: { 
+            facingMode: "user",
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+          }
         });
         document.getElementById('frontVideo').srcObject = stream;
+        document.getElementById('errorMessage').textContent = '';
       } catch (err) {
         console.error('フロントカメラの取得に失敗:', err);
-        alert('フロントカメラの取得に失敗しました。');
+        let errorMsg = 'フロントカメラの取得に失敗しました。';
+        
+        if (location.protocol !== 'https:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
+          errorMsg += ' HTTPSでの接続またはlocalhostでのアクセスが必要な可能性があります。';
+        }
+        
+        if (err.name === 'NotAllowedError') {
+          errorMsg += ' カメラへのアクセス権限が拒否されました。ブラウザの設定を確認してください。';
+        } else if (err.name === 'NotFoundError') {
+          errorMsg += ' カメラが見つかりませんでした。カメラが接続されているか確認してください。';
+        } else if (err.name === 'NotReadableError') {
+          errorMsg += ' カメラにアクセスできません。他のアプリがカメラを使用している可能性があります。';
+        } else if (err.name === 'OverconstrainedError') {
+          errorMsg += ' 指定された条件を満たすカメラがありません。';
+        } else if (err.name === 'SecurityError') {
+          errorMsg += ' セキュリティエラーが発生しました。安全な接続（HTTPS）が必要です。';
+        }
+        
+        document.getElementById('errorMessage').textContent = errorMsg;
+        alert(errorMsg);
       }
     });
   </script>
